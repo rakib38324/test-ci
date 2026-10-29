@@ -1,21 +1,40 @@
 
 name: Flutter CI
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  quality:
+  flutter-checks:
+    name: Format, Analyze and Test
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - name: Set Up Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
 
-      - run: flutter pub get
+      - name: Show Flutter Version
+        run: flutter --version
 
-      - run: dart format --output=none --set-exit-if-changed .
+      - name: Install Dependencies
+        run: flutter pub get
 
-      - run: flutter analyze
+      - name: Check Dart Formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze Flutter Code
+        run: flutter analyze
+
+      - name: Run Automated Tests
+        run: flutter test
